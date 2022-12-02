@@ -2268,7 +2268,6 @@
 6865
 1691")
 
-(+ 1 2)
 (comment
 
   (->> (clojure.string/split input #"\n\n")
