@@ -1,4 +1,4 @@
-(comment
+(ns advent)
 
 ; Day 1
 
@@ -2268,6 +2268,9 @@
 6865
 1691")
 
+(+ 1 2)
+(comment
+
   (->> (clojure.string/split input #"\n\n")
        (map #(clojure.string/split % #"\n"))
        (map #(apply + (map (fn [x] (Integer/parseInt x)) %)))
@@ -2280,6 +2283,7 @@
        (reverse)
        (take 3)
        (apply +))
+)
 
 ; Day 2
 
@@ -4808,6 +4812,8 @@ C Y")
          (map chars->nums)
          (map round-points)
          (apply +)))
+
+(comment
 
   (points round-points-part-i)
 
