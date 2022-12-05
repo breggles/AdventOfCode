@@ -1,6 +1,7 @@
 (ns advent
   (:require [clojure.string :as string]
-            [clojure.set :as st])
+            [clojure.set :as st]
+            [clojure.pprint :as pp])
   (:use [data]))
 
 ; Day 1
@@ -114,3 +115,60 @@
   (range-count ranges-overlap?)
 
 )
+
+; Day 5
+
+(defn debug [x] (pp/pprint x) x)
+
+(defonce stacks
+  (->> (string/split input-day5-stacks #"\n")
+       (map (partial partition-all 4))
+       (map (partial map (partial remove #{\space \[ \]})))
+       (map (partial map first))
+       (apply map vector)
+       (mapv (partial remove nil?))))
+
+(defonce moves
+  (->> (string/split input-day5-moves #"\n")
+       (map #(string/split % #" "))
+       (flatten)
+       (partition 2)
+       (map second)
+       (map #(Integer/parseInt %))
+       (partition 3)
+       (map (partial interleave [:count :from :to]))
+       (map (partial apply hash-map))
+       (map #(update % :from dec))
+       (map #(update % :to dec))))
+
+; (def moves
+;   (->> (string/split input-day5-moves #"\n")
+;        (take 10)
+;        (map (partial re-seq #"\d"))
+;        (map (partial map #(Integer/parseInt %)))
+;        (map (partial interleave [:count :from :to]))
+;        (map (partial apply hash-map))
+;        (map #(update % :from dec))
+;        (map #(update % :to dec))))
+
+(defn move-crates [stack crates]
+  (concat crates stack)
+  ; (concat (reverse crates) stack)
+  )
+
+(defn update-stacks [stacks move]
+  (let [[top bottom] (split-at (:count move)
+                               (nth stacks (:from move)))]
+    (-> stacks
+        (assoc (:from move) bottom)
+        (update (:to move) move-crates top))))
+
+(comment
+
+  (->> moves
+       (reduce update-stacks stacks)
+       (map first)
+       (apply str))
+
+)
+
