@@ -172,3 +172,11 @@
 
 )
 
+; Day 6
+
+(reduce-kv (fn [acc k v] (let [last-four (conj acc v)]
+                           (if (apply distinct? last-four)
+                            (reduced (+ 14 k))
+                            (vec (rest last-four)))))
+           (vec (take 13 input-day6))
+           (vec (drop 13 input-day6)))
