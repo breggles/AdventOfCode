@@ -36,11 +36,11 @@
 
 (defn round-points-part-i [[n1 n2]]
   (+ (* 3 (dist n2 n1))
-      (inc n2)))
+     (inc n2)))
 
 (defn round-points-part-ii [[n1 n2]]
   (+ (* 3 n2)
-      (inc (mod (+ n1 (dec n2)) 3))))
+     (inc (mod (+ n1 (dec n2)) 3))))
 
 (defn points [round-points]
   (->> (string/split input-day2 #"\n")
@@ -174,12 +174,18 @@
 
 ; Day 6
 
-(defn find-marker [prev index current-char]
-  (let [marker (conj prev current-char)]
-    (if (apply distinct? marker)
-      (reduced (+ 14 index))
-      (vec (rest marker)))))
+; (defn find-marker [prev index current-char]
+;   (let [marker (conj prev current-char)]
+;     (if (apply distinct? marker)
+;       (reduced (+ 14 index))
+;       (vec (rest marker)))))
 
-(reduce-kv find-marker
-           (vec (take 13 input-day6))
-           (vec (drop 13 input-day6)))
+; (reduce-kv find-marker
+;            (vec (take 13 input-day6))
+;            (vec (drop 13 input-day6)))
+
+(->> input-day6
+     (partition 4 1)
+     (take-while #(not (apply distinct? %)))
+     (count)
+     (+ 4))
