@@ -192,29 +192,29 @@
 
 ; Day 7
 
-(defonce input-day7 "$ cd /
-$ ls
-dir a
-14848514 b.txt
-8504156 c.dat
-dir d
-$ cd a
-$ ls
-dir e
-29116 f
-2557 g
-62596 h.lst
-$ cd e
-$ ls
-584 i
-$ cd ..
-$ cd ..
-$ cd d
-$ ls
-4060174 j
-8033020 d.log
-5626152 d.ext
-7214296 k")
+; (defonce input-day7 "$ cd /
+; $ ls
+; dir a
+; 14848514 b.txt
+; 8504156 c.dat
+; dir d
+; $ cd a
+; $ ls
+; dir e
+; 29116 f
+; 2557 g
+; 62596 h.lst
+; $ cd e
+; $ ls
+; 584 i
+; $ cd ..
+; $ cd ..
+; $ cd d
+; $ ls
+; 4060174 j
+; 8033020 d.log
+; 5626152 d.ext
+; 7214296 k")
 
 (defn change-dir [acc dir-name]
   (assoc acc :curr-dir
@@ -223,34 +223,37 @@ $ ls
            (conj (acc :curr-dir) dir-name))))
 
 (comment
-  (-> {:curr-dir [] :fs {"/" {}}}
+  (-> {:curr-dir [] :fs {"/" {:size 0}}}
       (change-dir "/")
       (change-dir "a")
-      (change-dir "..")))
+      (change-dir "..")
+      ))
 
 (defn new-dir [acc dir-name]
   (update-in acc
              (cons :fs (acc :curr-dir))
-             #(assoc % dir-name {})))
+             #(assoc % dir-name {:size 0})))
 
 (comment
-  (-> {:curr-dir ["/"] :fs {"/" {}}}
+  (-> {:curr-dir ["/"] :fs {"/" {:size 0}}}
       (new-dir "a")
       (new-dir "b")
       (change-dir "a")
-      (new-dir "c")))
+      (new-dir "c")
+      ))
 
-(defn new-file [acc file-name file-size]
+(defn new-file [acc file-size]
   (update-in acc
-             (cons :fs (acc :curr-dir))
-             #(assoc % file-name file-size)))
+             (conj (vec (cons :fs (acc :curr-dir))) :size)
+             + (Integer/parseInt file-size)))
 
 (comment
-  (-> {:curr-dir ["/"] :fs {"/" {}}}
-      (new-file "a" 123)
+  (-> {:curr-dir ["/"] :fs {"/" {:size 0}}}
+      (new-file "123")
+      (new-file "123")
       (new-dir "b")
       (change-dir "b")
-      (new-file "c" 1337)
+      (new-file "1337")
       ))
 
 (defn parse-fs [acc line]
@@ -259,13 +262,30 @@ $ ls
       "cd"  (change-dir acc part2)
       "dir" (new-dir acc part2)
       "ls"  acc
-      (new-file acc part2 part1))))
+      (new-file acc part1))))
 
-(defonce fs
+(def fs
   (-> (string/replace input-day7 "$ " "")
-    (string/split #"\n")
-    (#(reduce parse-fs {:curr-dir [] :fs {"/" {}}} %))
-    (:fs)
-    (debug)))
+      (string/split #"\n")
+      (#(reduce parse-fs {:curr-dir [] :fs {"/" {:size 0}}} %))
+      (:fs)
+      (debug)))
 
-(tree-seq map? vals fs)
+(defn sizes [node]
+  (if (:size node)
+    (vals node)
+    node))
+
+(defn sum-dirs [node]
+  (if (seq? node)
+    (list (apply + (first node)
+                   (map first (rest node)))
+          (rest node))
+    node))
+
+(->> (fs "/")
+     (clojure.walk/postwalk sizes)
+     (clojure.walk/postwalk sum-dirs)
+     (flatten)
+     (filter (partial >= 100000))
+     (apply +))
