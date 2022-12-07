@@ -192,29 +192,29 @@
 
 ; Day 7
 
-; (defonce input-day7 "$ cd /
-; $ ls
-; dir a
-; 14848514 b.txt
-; 8504156 c.dat
-; dir d
-; $ cd a
-; $ ls
-; dir e
-; 29116 f
-; 2557 g
-; 62596 h.lst
-; $ cd e
-; $ ls
-; 584 i
-; $ cd ..
-; $ cd ..
-; $ cd d
-; $ ls
-; 4060174 j
-; 8033020 d.log
-; 5626152 d.ext
-; 7214296 k")
+(def input-day7-test "$ cd /
+$ ls
+dir a
+14848514 b.txt
+8504156 c.dat
+dir d
+$ cd a
+$ ls
+dir e
+29116 f
+2557 g
+62596 h.lst
+$ cd e
+$ ls
+584 i
+$ cd ..
+$ cd ..
+$ cd d
+$ ls
+4060174 j
+8033020 d.log
+5626152 d.ext
+7214296 k")
 
 (defn change-dir [acc dir-name]
   (assoc acc :curr-dir
@@ -269,7 +269,8 @@
       (string/split #"\n")
       (#(reduce parse-fs {:curr-dir [] :fs {"/" {:size 0}}} %))
       (:fs)
-      (debug)))
+      ; (debug)
+      ))
 
 (defn sizes [node]
   (if (:size node)
@@ -278,14 +279,16 @@
 
 (defn sum-dirs [node]
   (if (seq? node)
-    (list (apply + (first node)
-                   (map first (rest node)))
+    (list (apply + (first (filter number? node))
+                   (map first (filter seq? node)))
           (rest node))
     node))
 
 (->> (fs "/")
      (clojure.walk/postwalk sizes)
      (clojure.walk/postwalk sum-dirs)
+     (debug)
      (flatten)
      (filter (partial >= 100000))
-     (apply +))
+     (apply +)
+     )
