@@ -189,3 +189,83 @@
      (take-while #(not (apply distinct? %)))
      (count)
      (+ 4))
+
+; Day 7
+
+(defonce input-day7 "$ cd /
+$ ls
+dir a
+14848514 b.txt
+8504156 c.dat
+dir d
+$ cd a
+$ ls
+dir e
+29116 f
+2557 g
+62596 h.lst
+$ cd e
+$ ls
+584 i
+$ cd ..
+$ cd ..
+$ cd d
+$ ls
+4060174 j
+8033020 d.log
+5626152 d.ext
+7214296 k")
+
+(defn change-dir [acc dir-name]
+  (assoc acc :curr-dir
+         (if (= ".." dir-name)
+           (pop (acc :curr-dir))
+           (conj (acc :curr-dir) dir-name))))
+
+(comment
+  (-> {:curr-dir [] :fs {"/" {}}}
+      (change-dir "/")
+      (change-dir "a")
+      (change-dir "..")))
+
+(defn new-dir [acc dir-name]
+  (update-in acc
+             (cons :fs (acc :curr-dir))
+             #(assoc % dir-name {})))
+
+(comment
+  (-> {:curr-dir ["/"] :fs {"/" {}}}
+      (new-dir "a")
+      (new-dir "b")
+      (change-dir "a")
+      (new-dir "c")))
+
+(defn new-file [acc file-name file-size]
+  (update-in acc
+             (cons :fs (acc :curr-dir))
+             #(assoc % file-name file-size)))
+
+(comment
+  (-> {:curr-dir ["/"] :fs {"/" {}}}
+      (new-file "a" 123)
+      (new-dir "b")
+      (change-dir "b")
+      (new-file "c" 1337)
+      ))
+
+(defn parse-fs [acc line]
+  (let [[part1 part2] (string/split line #" ")]
+    (condp = part1
+      "cd"  (change-dir acc part2)
+      "dir" (new-dir acc part2)
+      "ls"  acc
+      (new-file acc part2 part1))))
+
+(defonce fs
+  (-> (string/replace input-day7 "$ " "")
+    (string/split #"\n")
+    (#(reduce parse-fs {:curr-dir [] :fs {"/" {}}} %))
+    (:fs)
+    (debug)))
+
+(tree-seq map? vals fs)
