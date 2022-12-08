@@ -317,13 +317,14 @@ $ ls
 33549
 35390")
 
-(defn surround [coll]
-  (concat (list (repeat 7 -1))
-          (map #(concat '(-1) % '(-1)) coll)
-          (list (repeat 7 -1))))
+(defn surround [x coll]
+  (let [row-length (+ 2 (count (first coll)))]
+    (concat (list (repeat row-length x))
+          (map #(concat (list x) % (list x)) coll)
+          (list (repeat row-length x)))))
 
 (->> (concat (string/split input-day8-test #"\n"))
      (map #(map (fn [c] (Integer/parseInt (str c))) %))
-     (surround)
+     (surround -1)
      ; (#(get-in % [1 1]))
      )
