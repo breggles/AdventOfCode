@@ -264,7 +264,7 @@ $ ls
       "dir" (new-dir acc part2)
       (new-file acc part1))))
 
-(def fs
+(defonce fs
   (-> (string/replace input-day7 "$ " "")
       (string/split #"\n")
       (#(reduce parse-fs {:curr-dir [] :fs {"/" {:size 0}}} %))
@@ -308,3 +308,22 @@ $ ls
        (filter (partial <= space-required))
        (apply min)
        ))
+
+; Day 8
+
+(defonce input-day8-test "30373
+25512
+65332
+33549
+35390")
+
+(defn surround [coll]
+  (concat (list (repeat 7 -1))
+          (map #(concat '(-1) % '(-1)) coll)
+          (list (repeat 7 -1))))
+
+(->> (concat (string/split input-day8-test #"\n"))
+     (map #(map (fn [c] (Integer/parseInt (str c))) %))
+     (surround)
+     ; (#(get-in % [1 1]))
+     )
