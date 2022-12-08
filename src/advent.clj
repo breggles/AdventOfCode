@@ -192,29 +192,29 @@
 
 ; Day 7
 
-; (defonce input-day7 "$ cd /
-; $ ls
-; dir a
-; 14848514 b.txt
-; 8504156 c.dat
-; dir d
-; $ cd a
-; $ ls
-; dir e
-; 29116 f
-; 2557 g
-; 62596 h.lst
-; $ cd e
-; $ ls
-; 584 i
-; $ cd ..
-; $ cd ..
-; $ cd d
-; $ ls
-; 4060174 j
-; 8033020 d.log
-; 5626152 d.ext
-; 7214296 k")
+(defonce input-day7-test "$ cd /
+$ ls
+dir a
+14848514 b.txt
+8504156 c.dat
+dir d
+$ cd a
+$ ls
+dir e
+29116 f
+2557 g
+62596 h.lst
+$ cd e
+$ ls
+584 i
+$ cd ..
+$ cd ..
+$ cd d
+$ ls
+4060174 j
+8033020 d.log
+5626152 d.ext
+7214296 k")
 
 (defn change-dir [acc dir-name]
   (assoc acc :curr-dir
@@ -260,8 +260,8 @@
   (let [[part1 part2] (string/split line #" ")]
     (condp = part1
       "cd"  (change-dir acc part2)
-      "dir" (new-dir acc part2)
       "ls"  acc
+      "dir" (new-dir acc part2)
       (new-file acc part1))))
 
 (def fs
@@ -269,23 +269,43 @@
       (string/split #"\n")
       (#(reduce parse-fs {:curr-dir [] :fs {"/" {:size 0}}} %))
       (:fs)
-      (debug)))
+      ; (debug)
+      ))
+
+(defn comp-seq-num [x y]
+  (cond
+    (and (seq?    x) (number? y))  1
+    (and (number? x) (seq?    y)) -1
+    :else                          0))
 
 (defn sizes [node]
   (if (:size node)
-    (vals node)
+    (sort comp-seq-num (vals node))
     node))
 
 (defn sum-dirs [node]
   (if (seq? node)
-    (list (apply + (first node)
-                   (map first (rest node)))
-          (rest node))
+    (apply list (apply + (first node)
+                         (map first (rest node)))
+                (rest node))
     node))
 
-(->> (fs "/")
-     (clojure.walk/postwalk sizes)
-     (clojure.walk/postwalk sum-dirs)
-     (flatten)
-     (filter (partial >= 100000))
-     (apply +))
+(defonce dir-sizes
+  (->> (fs "/")
+       (clojure.walk/postwalk sizes)
+       (clojure.walk/postwalk sum-dirs)
+       (flatten)))
+
+(defonce space-required (- 30000000 (- 70000000 (first dir-sizes))))
+
+(comment
+
+  (->> dir-sizes
+       (filter (partial >= 100000))
+       (apply +)
+       )
+
+  (->> dir-sizes
+       (filter (partial <= space-required))
+       (apply min)
+       ))
