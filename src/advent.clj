@@ -269,7 +269,6 @@ $ ls
       (string/split #"\n")
       (#(reduce parse-fs {:curr-dir [] :fs {"/" {:size 0}}} %))
       (:fs)
-      ; (debug)
       ))
 
 (defn comp-seq-num [x y]
