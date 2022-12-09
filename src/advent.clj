@@ -311,20 +311,55 @@ $ ls
 
 ; Day 8
 
-(defonce input-day8-test "30373
+(defonce input-day8-test
+"30373
 25512
 65332
 33549
 35390")
 
-(defn surround [x coll]
-  (let [row-length (+ 2 (count (first coll)))]
-    (concat (list (repeat row-length x))
-          (map #(concat (list x) % (list x)) coll)
-          (list (repeat row-length x)))))
+(defn rotate [coll]
+  (apply mapv vector (reverse coll)))
 
-(->> (concat (string/split input-day8-test #"\n"))
-     (map #(map (fn [c] (Integer/parseInt (str c))) %))
-     (surround -1)
-     ; (#(get-in % [1 1]))
-     )
+(defn init-visibility-field [size]
+  (vec (repeat size (vec (repeat size false)))))
+
+(defn parse-forrest [forrest-string]
+  (->> (string/split forrest-string #"\n")
+       (map (partial map str))
+       (map (partial map #(Integer/parseInt %)))
+       (map vec)
+       (vec)))
+
+(defn update-visibility [curr-visibility row max-row]
+  (->> (map - row max-row)
+       (map pos?)
+       (map #(or %1 %2) curr-visibility)))
+
+(defn row-visibility [acc row-num row]
+  (-> acc
+      (update-in [:visibility row-num]
+                 update-visibility
+                 row (acc :max-row))
+      (update :max-row (partial map max row))))
+
+(defn directional-visibility [visibility forrest]
+  (-> (reduce-kv row-visibility
+                 {:visibility visibility
+                  :max-row    (repeat (count forrest) -1)}
+                 forrest)
+      (:visibility)
+      (rotate)))
+
+(defn visibility-field [forrest]
+  (reduce directional-visibility
+          (init-visibility-field (count forrest)) ; assume forrest is square
+          (take 4 (iterate rotate forrest))))
+
+(comment
+  (->> (parse-forrest input-day8)
+       (visibility-field)
+       (flatten)
+       (filter identity)
+       (count))
+  )
