@@ -322,7 +322,8 @@ $ ls
   (apply mapv vector (reverse coll)))
 
 (defn init-visibility-field [size]
-  (vec (repeat size (vec (repeat size false)))))
+  (->> false (repeat size) (vec)
+             (repeat size) (vec)))
 
 (defn parse-forrest [forrest-string]
   (->> (string/split forrest-string #"\n")
