@@ -371,36 +371,31 @@ $ ls
        (map str)
        (mapv #(Integer/parseInt %))))
 
+(defn forrest-width [forrest]
+  (Math/sqrt (count forrest)))
 
 (defn direction [n pred step-fn]
   (take-while pred
               (rest (iterate step-fn n))))
 
 (defn up [n forrest]
-  (let [forrest-size  (count forrest)
-        forrest-width (Math/sqrt forrest-size)]
-    (direction n
-               (partial < -1)
-               #(- % forrest-width))))
+  (direction n
+            (partial < -1)
+            #(- %  (forrest-width forrest))))
 
 (defn down [n forrest]
-  (let [forrest-size  (count forrest)
-        forrest-width (Math/sqrt forrest-size)]
-    (direction n
-               (partial > forrest-size)
-               (partial + forrest-width))))
+  (direction n
+             (partial > (count forrest))
+             (partial + (forrest-width forrest))))
 
 (defn left [n forrest]
-  (let [forrest-size  (count forrest)
-        forrest-width (Math/sqrt forrest-size)
-        row-start     (- n (mod n forrest-width))]
+  (let [row-start (- n (mod n (forrest-width forrest)))]
     (direction n
                (partial <= row-start)
                dec)))
 
 (defn right [n forrest]
-  (let [forrest-size  (count forrest)
-        forrest-width (Math/sqrt forrest-size)
+  (let [forrest-width (forrest-width forrest)
         row-end       (+ forrest-width (- n (mod n forrest-width)))]
     (direction n
                (partial > row-end)
