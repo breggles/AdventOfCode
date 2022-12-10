@@ -425,3 +425,13 @@ $ ls
 (comment
   (max-scenic-score (parse-forrest-2 input-day8))
 )
+
+; Day 9
+
+(->> (string/split input-day9-test #"\n")
+     (map #(string/split % #" "))
+     (map #(if (= 2 (count %))
+             {:op :addx :val (Integer/parseInt (second %))}
+             {:op :noop}))
+     (map #(if (:op :addx)))
+     )
