@@ -309,7 +309,7 @@ $ ls
        (apply min)
        ))
 
-; Day 8
+; Day 8 - part 1
 
 (defonce input-day8-test
 "30373
@@ -329,8 +329,7 @@ $ ls
   (->> (string/split forrest-string #"\n")
        (map (partial map str))
        (map (partial map #(Integer/parseInt %)))
-       (map vec)
-       (vec)))
+       (mapv vec)))
 
 (defn update-visibility [curr-visibility row max-row]
   (->> (map - row max-row)
@@ -363,4 +362,71 @@ $ ls
        (flatten)
        (filter identity)
        (count))
-  )
+)
+
+; Day 8 - part 2
+
+(defn parse-forrest-2 [forrest-string]
+  (->> (string/replace forrest-string #"\n" "")
+       (map str)
+       (mapv #(Integer/parseInt %))))
+
+
+(defn direction [n pred step-fn]
+  (take-while pred
+              (rest (iterate step-fn n))))
+
+(defn up [n forrest]
+  (let [forrest-size  (count forrest)
+        forrest-width (Math/sqrt forrest-size)]
+    (direction n
+               (partial < -1)
+               #(- % forrest-width))))
+
+(defn down [n forrest]
+  (let [forrest-size  (count forrest)
+        forrest-width (Math/sqrt forrest-size)]
+    (direction n
+               (partial > forrest-size)
+               (partial + forrest-width))))
+
+(defn left [n forrest]
+  (let [forrest-size  (count forrest)
+        forrest-width (Math/sqrt forrest-size)
+        row-start     (- n (mod n forrest-width))]
+    (direction n
+               (partial <= row-start)
+               dec)))
+
+(defn right [n forrest]
+  (let [forrest-size  (count forrest)
+        forrest-width (Math/sqrt forrest-size)
+        row-end       (+ forrest-width (- n (mod n forrest-width)))]
+    (direction n
+               (partial > row-end)
+               inc)))
+
+(defn direction-view [forrest tree-num view-direction]
+  (let [tree-height (nth forrest tree-num)
+        [lowers blocked]
+          (split-with (partial > tree-height)
+                      (map (partial nth forrest)
+                           (view-direction tree-num forrest)))]
+    (concat lowers (take 1 blocked))))
+
+(defonce directions [up right down left])
+
+(defn scenic-score [forrest n]
+  (->> directions
+       (map (partial direction-view forrest n))
+       (map count)
+       (apply *)))
+
+(defn max-scenic-score [forrest]
+  (->> (range (count forrest))
+       (map (partial scenic-score forrest))
+       (apply max)))
+
+(comment
+  (max-scenic-score (parse-forrest-2 input-day8))
+)
