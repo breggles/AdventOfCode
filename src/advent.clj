@@ -428,10 +428,42 @@ $ ls
 
 ; Day 9
 
-(->> (string/split input-day9-test #"\n")
-     (map #(string/split % #" "))
-     (map #(if (= 2 (count %))
-             {:op :addx :val (Integer/parseInt (second %))}
-             {:op :noop}))
-     (map #(if (:op :addx)))
-     )
+(re-seq #"(\w) (\d+)" input-day9-test)
+
+; Day 10
+
+(defn beam-on-sprite? [beam-pos sprite-pos]
+  (<= (dec sprite-pos) beam-pos (inc sprite-pos)))
+
+(defn build-screen [screen beam-pos sprite-pos]
+  (conj screen
+        (if (beam-on-sprite? (mod beam-pos 40) sprite-pos)
+          \#
+          \.)))
+
+(defonce cycles
+  (->> (string/split input-day10 #"\n")
+      (map #(string/split % #" "))
+      (map #(if (= 2 (count %))
+              {:op :addx :val (Integer/parseInt (second %))}
+              {:op :noop}))
+      (reduce #(if (= :addx (:op %2))
+                  (-> %1 (conj (last %1)) (conj (+ (last %1) (:val %2))))
+                  (conj %1 (last %1)))
+              [1 1])))
+
+(comment
+
+  ; part 1
+
+  (->> (range 20 260 40)
+       (map #(* (nth cycles %) %))
+       (apply +))
+
+  ; part 2
+
+  (->> (vec (take 240 (rest cycles)))
+       (reduce-kv build-screen [])
+       (partition 40)
+       (map (partial apply str)))
+  )
