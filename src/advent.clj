@@ -428,7 +428,39 @@ $ ls
 
 ; Day 9
 
-(re-seq #"(\w) (\d+)" input-day9-test)
+(defonce letter->vec {\U [ 0  1]
+                      \R [ 1  0]
+                      \D [ 0 -1]
+                      \L [-1  0]})
+
+(defn vec* [v scalar]
+  (mapv (partial * scalar) v))
+
+(defn vec+ [v1 v2]
+  (mapv (partial +) v1 v2))
+
+(defn vec- [v1 v2]
+  (vec+ v1 (vec* v2 -1)))
+
+(defn h-path [[curr-pos :as path] [dir cnt]]
+  (if (zero? cnt)
+    path
+    (recur (conj path (vec+ curr-pos dir))
+           [dir (dec cnt)])))
+
+(defn t-path [[curr-t-pos :as t-path] curr-h-pos]
+               (let [[x-dist y-dist :as dist] (vec- curr-h-pos [0 0])]
+                  (conj t-path (if (< 2 (max x-dist y-dist))
+                                dist
+                                dist))))
+
+(->> (re-seq #"([ULDR]) (\d+)" input-day9-test)
+     (map (fn [[_ [dir] cnt]] [(letter->vec dir)
+                               (Integer/parseInt cnt)]))
+     (reduce h-path '([0 0]))
+     (reverse)
+     (reduce t-path '())
+     )
 
 ; Day 10
 
