@@ -442,25 +442,43 @@ $ ls
 (defn vec- [v1 v2]
   (vec+ v1 (vec* v2 -1)))
 
+(defn vec->dist [v]
+  (apply max (map abs v)))
+
+(defn ht-dist [v1 v2]
+  (vec->dist (vec- v1 v2)))
+
 (defn h-path [[curr-pos :as path] [dir cnt]]
   (if (zero? cnt)
     path
     (recur (conj path (vec+ curr-pos dir))
            [dir (dec cnt)])))
 
-(defn t-path [[curr-t-pos :as t-path] curr-h-pos]
-               (let [[x-dist y-dist :as dist] (vec- curr-h-pos [0 0])]
-                  (conj t-path (if (< 2 (max x-dist y-dist))
-                                dist
-                                dist))))
+(defn sign [n] (/ n (abs n)))
 
-(->> (re-seq #"([ULDR]) (\d+)" input-day9-test)
-     (map (fn [[_ [dir] cnt]] [(letter->vec dir)
-                               (Integer/parseInt cnt)]))
-     (reduce h-path '([0 0]))
-     (reverse)
-     (reduce t-path '())
-     )
+(defn trim-vec [v]
+  (mapv #(if (< 1 (abs %)) (* (sign %) (dec (abs %))) %) v))
+
+(defn t-path [[curr-t-pos :as t-path] curr-h-pos]
+  (let [[x-dist y-dist :as dist-vec] (vec- curr-h-pos curr-t-pos)]
+    (conj t-path (if (< 1 (vec->dist dist-vec))
+                   (vec+ (trim-vec dist-vec) curr-t-pos)
+                   curr-t-pos))))
+
+(comment
+
+  (->> (re-seq #"([ULDR]) (\d+)" input-day9)
+       (map (fn [[_ [dir] cnt]] [(letter->vec dir)
+                                 (Integer/parseInt cnt)]))
+       (reduce h-path '([0 0]))
+       (iterate #(reduce t-path '([0 0]) (reverse %)))
+       (drop 9)
+       (first)
+       (distinct)
+       (count)
+      )
+
+)
 
 ; Day 10
 
