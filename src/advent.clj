@@ -517,3 +517,7 @@ $ ls
        (partition 40)
        (map (partial apply str)))
   )
+
+; Day 11
+
+(defmacro monkey [m])
