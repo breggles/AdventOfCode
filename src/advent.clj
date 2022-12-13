@@ -520,4 +520,19 @@ $ ls
 
 ; Day 11
 
-(defmacro monkey [m])
+(defmacro items [_ _ & items]
+  `[:items [~@items]])
+
+(defmacro operation [op vl]
+  [:op `(partial ~op ~vl)])
+
+(defmacro monkey [_ _ & body]
+  `(apply hash-map (items ~@body)))
+
+(comment
+  (items Starting items 79, 98)
+
+  ((second (operation * 19)) 2)
+
+  (monkey Monkey 0
+            Starting items 79, 98))
