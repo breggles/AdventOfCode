@@ -535,4 +535,12 @@ $ ls
   ((second (operation * 19)) 2)
 
   (monkey Monkey 0
-            Starting items 79, 98))
+            Starting items 79, 98)
+
+  (->> (string/split input-day11-test #"\n\n")
+       (map  #(as-> % $
+                    (string/replace $ ":" "")
+                    (string/split $ #"\n")
+                    (drop 1 $)
+                    (map (fn [f s] (f s)) (cons read-string (repeat identity)) $)))
+       ))
