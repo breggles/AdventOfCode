@@ -520,17 +520,17 @@ $ ls
 
 ; Day 11
 
-(defmacro items [& items]
-  `[:items [~@items]])
+; (defmacro items [& items]
+;   `[:items [~@items]])
 
-(defmacro operation [_ _ _ op vl]
-  [:op `(partial ~op ~vl)])
+; (defmacro operation [_ _ _ op vl]
+;   [:op `(partial ~op ~vl)])
 
-(defmacro test [_ _ d]
-  [:test-divisor d])
+; (defmacro test [_ _ d]
+;   [:test-divisor d])
 
-(defmacro monkey [_ _ & body]
-  `(apply hash-map (items ~@body)))
+; (defmacro monkey [_ _ & body]
+;   `(apply hash-map (items ~@body)))
 
 ; (defn parse-items [s]
 ;   (->> (string/split s #" ")
@@ -539,23 +539,33 @@ $ ls
 ;        (eval)
 ;        ))
 
-(defn parse-op [s]
-  (->> (string/split s #" ")
-       (map read-string)
-       (eval)
-       ))
+; (defn parse-op [s]
+;   (->> (string/split s #" ")
+;        (map read-string)
+;        (eval)
+;        ))
 
-(defn parse-test [s]
-  (->> (string/split s #" ")
-       (map read-string)
-       (eval)
-       ))
+; (defn parse-test [s]
+;   (->> (string/split s #" ")
+;        (map read-string)
+;        (eval)
+;        ))
+
+(def new-monkey {:items []
+                 :op nil
+                 :test-div nil
+                 :true-monkey nil
+                 :false-monkey nil})
 
 (defn parse-monkeys [acc token]
-  (case token
-    "monkey" (update acc :monkeys conj {:items [] :op nil :test-div nil :true-monkey nil :false-monkey nil})
-    "items:" (update acc :vector [:monkeys (count (dec (acc :monkeys))) :items])
-    acc))
+  (let [curr-monk-idx (dec (count (acc :monkeys)))]
+    (cond
+      (= token "monkey") (update acc :monkeys conj new-monkey)
+      (= token "items") (assoc acc :vector [:monkeys curr-monk-idx :items])
+      (= token "operation") (assoc acc :vector [:monkeys curr-monk-idx :op])
+      (number? (read-string token)) (update-in acc (acc :vector) conj (read-string token))
+      (fn? (read-string token))
+      :else acc)))
 
 (comment
   (as-> "Monkey 0:
@@ -566,8 +576,9 @@ $ ls
     If false: throw to monkey 3"
        $
        (string/lower-case $)
-       ; (string/replace $ ":" "")
+       (string/replace $ ":" "")
        (string/split $ #"\s")
+       (remove (partial = "") $)
        ; (debug $)
        (reduce parse-monkeys {:monkeys [] :vector nil} $))
 
