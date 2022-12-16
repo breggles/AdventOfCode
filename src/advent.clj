@@ -520,14 +520,39 @@ $ ls
 
 ; Day 11
 
-(defmacro items [_ _ & items]
+(defmacro items [& items]
   `[:items [~@items]])
 
-(defmacro operation [op vl]
+(defmacro operation [_ _ _ op vl]
   [:op `(partial ~op ~vl)])
+
+(defmacro true [_ _ d]
+  [:test-divisor d])
+
+(defmacro test [_ _ d]
+  [:test-divisor d])
 
 (defmacro monkey [_ _ & body]
   `(apply hash-map (items ~@body)))
+
+(defn parse-items [s]
+  (->> (string/split s #" ")
+       (drop 1)
+       (map read-string)
+       (eval)
+       ))
+
+(defn parse-op [s]
+  (->> (string/split s #" ")
+       (map read-string)
+       (eval)
+       ))
+
+(defn parse-test [s]
+  (->> (string/split s #" ")
+       (map read-string)
+       (eval)
+       ))
 
 (comment
   (items Starting items 79, 98)
@@ -537,10 +562,20 @@ $ ls
   (monkey Monkey 0
             Starting items 79, 98)
 
+  (parse-items "Starting items 79, 98")
+
+  (test divisible by 23)
+
+  (parse-test "test divisible by 23")
+
+  (def old nil)
+
   (->> (string/split input-day11-test #"\n\n")
        (map  #(as-> % $
                     (string/replace $ ":" "")
+                    (string/lower-case $)
                     (string/split $ #"\n")
+                    (map string/trim $)
                     (drop 1 $)
-                    (map (fn [f s] (f s)) (cons read-string (repeat identity)) $)))
+                    (map (fn [f s] (f s)) (concat [parse-items parse-op parse-test] (repeat identity)) $)))
        ))
