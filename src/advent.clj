@@ -526,21 +526,18 @@ $ ls
 (defmacro operation [_ _ _ op vl]
   [:op `(partial ~op ~vl)])
 
-(defmacro true [_ _ d]
-  [:test-divisor d])
-
 (defmacro test [_ _ d]
   [:test-divisor d])
 
 (defmacro monkey [_ _ & body]
   `(apply hash-map (items ~@body)))
 
-(defn parse-items [s]
-  (->> (string/split s #" ")
-       (drop 1)
-       (map read-string)
-       (eval)
-       ))
+; (defn parse-items [s]
+;   (->> (string/split s #" ")
+;        (drop 1)
+;        (map read-string)
+;        (eval)
+;        ))
 
 (defn parse-op [s]
   (->> (string/split s #" ")
@@ -554,7 +551,33 @@ $ ls
        (eval)
        ))
 
+(defn parse-monkeys [acc token]
+  (case token
+    "monkey" (update acc :monkeys conj {:items [] :op nil :test-div nil :true-monkey nil :false-monkey nil})
+    "items:" (update acc :vector [:monkeys (count (dec (acc :monkeys))) :items])
+    acc))
+
 (comment
+  (as-> "Monkey 0:
+  Starting items: 79, 98
+  Operation: new = old * 19
+  Test: divisible by 23
+    If true: throw to monkey 2
+    If false: throw to monkey 3"
+       $
+       (string/lower-case $)
+       ; (string/replace $ ":" "")
+       (string/split $ #"\s")
+       ; (debug $)
+       (reduce parse-monkeys {:monkeys [] :vector nil} $))
+
+  (re-find #"items: ((\d+[, ]*)+)" "Monkey 0:
+  Starting items: 79, 98
+  Operation: new = old * 19
+  Test: divisible by 23
+    If true: throw to monkey 2
+    If false: throw to monkey 3")
+
   (items Starting items 79, 98)
 
   ((second (operation * 19)) 2)
