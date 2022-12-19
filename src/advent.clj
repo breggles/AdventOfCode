@@ -564,7 +564,7 @@ $ ls
       (= token "items") (assoc acc :vector [:monkeys curr-monk-idx :items])
       (= token "operation") (assoc acc :vector [:monkeys curr-monk-idx :op])
       (number? (read-string token)) (update-in acc (acc :vector) conj (read-string token))
-      (fn? (read-string token))
+      (fn? (debug (read-string token))) (update-in acc (acc :vector) conj (read-string token))
       :else acc)))
 
 (comment
@@ -573,8 +573,7 @@ $ ls
   Operation: new = old * 19
   Test: divisible by 23
     If true: throw to monkey 2
-    If false: throw to monkey 3"
-       $
+    If false: throw to monkey 3" $
        (string/lower-case $)
        (string/replace $ ":" "")
        (string/split $ #"\s")
@@ -613,3 +612,9 @@ $ ls
                     (drop 1 $)
                     (map (fn [f s] (f s)) (concat [parse-items parse-op parse-test] (repeat identity)) $)))
        ))
+
+(comment
+
+  (->> (string/split input-day11-test #"\n\n")
+       (map #(string/split % #"\n"))
+       (map \)))
