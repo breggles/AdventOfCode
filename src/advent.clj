@@ -564,8 +564,13 @@ $ ls
       (= token "items") (assoc acc :vector [:monkeys curr-monk-idx :items])
       (= token "operation") (assoc acc :vector [:monkeys curr-monk-idx :op])
       (number? (read-string token)) (update-in acc (acc :vector) conj (read-string token))
-      (fn? (debug (read-string token))) (update-in acc (acc :vector) conj (read-string token))
+      (and (symbol? (read-string token))
+           (resolve (read-string token))
+           (fn? (deref (resolve (read-string token)))))
+        (assoc-in acc (acc :vector) (resolve (read-string token)))
       :else acc)))
+
+(fn? (deref (resolve (read-string "="))))
 
 (comment
   (as-> "Monkey 0:
@@ -617,4 +622,4 @@ $ ls
 
   (->> (string/split input-day11-test #"\n\n")
        (map #(string/split % #"\n"))
-       (map \)))
+       ))
