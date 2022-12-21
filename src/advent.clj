@@ -631,20 +631,34 @@ $ ls
     If true: throw to monkey 2
     If false: throw to monkey 3")
 
-(def split *1)
-
-(def s (second split))
-
 (defn tokenize [s]
   (let [[token-chars s-rest] (split-with #(not= \space %) s)]
     (lazy-seq
       (cons (apply str token-chars)
             (tokenize (drop-while (partial = \space) s-rest))))))
 
+(defn tokenize2 [s]
+  (let [[token s-rest]
+        (loop [chr (first s) rst (rest s) token-vec []]
+          (if (contains? #{\space \newline \:} chr)
+            [(apply str token-vec) rst]
+            (recur (first rst) (rest rst) (conj token-vec chr))))
+        ]
+    (lazy-seq
+      (when (seq s-rest)
+        (cons token
+              (tokenize2 s-rest))))))
 (comment
+  (filter empty? (rest (rest (rest "a"))))
+  (filter empty? (next "a"))
+  (empty? nil)
 
   (take 30 (tokenize (string/replace s #"[\n:]" "")))
 
-  (take 3 (tokenize s))
-  
+  (time (take 30 (tokenize s)))
+
+  (take 3 (remove empty? ["a" "" "b"]))
+
+  (time (take 30 (remove empty? (tokenize2 s))))
+
   )
