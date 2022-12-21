@@ -623,3 +623,28 @@ $ ls
   (->> (string/split input-day11-test #"\n\n")
        (map #(string/split % #"\n"))
        ))
+
+(def s "Monkey 0:
+  Starting items: 79, 98
+  Operation: new = old * 19
+  Test: divisible by 23
+    If true: throw to monkey 2
+    If false: throw to monkey 3")
+
+(def split *1)
+
+(def s (second split))
+
+(defn tokenize [s]
+  (let [[token-chars s-rest] (split-with #(not= \space %) s)]
+    (lazy-seq
+      (cons (apply str token-chars)
+            (tokenize (drop-while (partial = \space) s-rest))))))
+
+(comment
+
+  (take 30 (tokenize (string/replace s #"[\n:]" "")))
+
+  (take 3 (tokenize s))
+  
+  )
